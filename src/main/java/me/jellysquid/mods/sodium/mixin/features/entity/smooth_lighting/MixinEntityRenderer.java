@@ -26,7 +26,8 @@ public abstract class MixinEntityRenderer<T extends Entity> implements EntityLig
     @Inject(method = "getLight", at = @At("HEAD"), cancellable = true)
     private void preGetLight(T entity, float tickDelta, CallbackInfoReturnable<Integer> cir) {
         // Use smooth entity lighting if enabled
-        if (SodiumClientMod.options().quality.smoothLighting == SodiumGameOptions.LightingQuality.HIGH) {
+        if (SodiumClientMod.options().quality.enableLights
+                && SodiumClientMod.options().quality.smoothLighting == SodiumGameOptions.LightingQuality.HIGH) {
             cir.setReturnValue(EntityLighter.getBlendedLight(this, entity, tickDelta));
         }
     }

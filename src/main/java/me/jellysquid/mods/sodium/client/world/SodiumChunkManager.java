@@ -5,6 +5,8 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.util.collections.FixedLongHashTable;
+import me.jellysquid.mods.sodium.client.world.chunk.light.DynamicLightingProvider;
+import me.jellysquid.mods.sodium.client.world.chunk.light.FixedLightingProvider;
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.nbt.CompoundTag;
@@ -54,9 +56,7 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
         this.radius = getChunkMapRadius(loadDistance);
         this.chunks = new FixedLongHashTable<>(getChunkMapSize(this.radius), Hash.FAST_LOAD_FACTOR);
 
-        boolean enableLights = SodiumClientMod.options().quality.enableLights;
-
-        this.lightingProvider = new LightingProvider(this, enableLights, enableLights && world.getDimension().hasSkyLight());
+        this.lightingProvider = new DynamicLightingProvider(this, true, world.getDimension().hasSkyLight());
     }
 
     @Override

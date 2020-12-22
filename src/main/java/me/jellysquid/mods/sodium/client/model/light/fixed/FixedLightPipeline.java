@@ -27,6 +27,6 @@ public class FixedLightPipeline implements LightPipeline {
     @Override
     public void calculate(ModelQuadView quad, BlockPos pos, QuadLightData out, Direction face, boolean shade) {
         Arrays.fill(out.lm, 15728640);
-        Arrays.fill(out.br, 1.0f);
+        Arrays.fill(out.br, value);
     }
 }
