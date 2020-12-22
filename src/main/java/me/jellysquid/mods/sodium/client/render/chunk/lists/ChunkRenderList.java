@@ -8,21 +8,24 @@ import java.util.Arrays;
  * A simple extension over {@link ObjectArrayList} which provides iterator methods in either FIFO or LIFO ordering.
  */
 public class ChunkRenderList<T> {
+    private final int initialCapacity;
     private T[] stateArray;
     private int[] cullArray;
     private int size, capacity;
 
     public ChunkRenderList() {
-        this(1024);
+        this(2048);
     }
 
     @SuppressWarnings("unchecked")
     public ChunkRenderList(int capacity) {
-        this.size = 0;
-        this.capacity = capacity;
+        this.initialCapacity = capacity;
 
-        this.stateArray = (T[]) new Object[capacity];
-        this.cullArray = new int[capacity];
+        this.size = 0;
+        this.capacity = initialCapacity;
+
+        this.stateArray = (T[]) new Object[initialCapacity];
+        this.cullArray = new int[initialCapacity];
     }
 
     private void resize() {
@@ -46,14 +49,6 @@ public class ChunkRenderList<T> {
     public void reset() {
         if (this.size == 0) {
             return;
-        }
-
-        for (int i = 0; i < this.size; i++) {
-            this.stateArray[i] = null;
-        }
-
-        for (int i = 0; i < this.size; i++) {
-            this.cullArray[i] = 0;
         }
 
         this.size = 0;
