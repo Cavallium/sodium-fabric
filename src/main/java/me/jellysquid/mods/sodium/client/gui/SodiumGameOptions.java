@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
+import me.jellysquid.mods.sodium.client.model.light.fixed.OptionFixedLightPipeline;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl20.GL20ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl30.GL30ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl43.GL43ChunkRenderBackend;
@@ -50,7 +51,25 @@ public class SodiumGameOptions {
         public boolean enableClouds = true;
         public boolean enableFog = true;
 
+        /**
+         * 0 to 100
+         */
+        public int fixedLightLevel = 100;
+        /**
+         * 0 to 15
+         */
+        public transient int fixedLightLevelMcValue = 15;
+
         public LightingQuality smoothLighting = LightingQuality.HIGH;
+
+        /**
+         * @return light level from 0 to 100
+         */
+        public void setFixedLightLevel(int value) {
+            OptionFixedLightPipeline.setValue(value);
+            this.fixedLightLevelMcValue = (int) (value * 15.0f / 100.0f);
+            this.fixedLightLevel = value;
+        }
     }
 
     public enum ChunkRendererBackendOption implements TextProvider {

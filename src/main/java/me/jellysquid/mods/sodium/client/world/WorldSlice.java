@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.world;
 
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuilder;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeCache;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeCacheManager;
@@ -72,6 +73,9 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
     private final BiomeCache[] biomeCaches;
     private final BiomeArray[] biomeArrays;
 
+    private final boolean enableLights;
+    private final int fixedLightLevel;
+
     // The biome blend caches for each color resolver type
     // This map is always re-initialized, but the caches themselves are taken from an object pool
     private final Map<ColorResolver, BiomeColorCache> colorResolvers = new Reference2ObjectOpenHashMap<>();
@@ -126,10 +130,19 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
         return chunks;
     }
 
-    public WorldSlice() {
+    public WorldSlice(boolean enableLights, int fixedLightLevel) {
+        this.enableLights = enableLights;
+        this.fixedLightLevel = fixedLightLevel;
+
         this.blockStates = new BlockState[BLOCK_COUNT];
-        this.blockLightArrays = new ChunkNibbleArray[SECTION_COUNT];
-        this.skyLightArrays = new ChunkNibbleArray[SECTION_COUNT];
+
+        if (this.enableLights) {
+            this.blockLightArrays = new ChunkNibbleArray[SECTION_COUNT];
+            this.skyLightArrays = new ChunkNibbleArray[SECTION_COUNT];
+        } else {
+            this.blockLightArrays = null;
+            this.skyLightArrays = null;
+        }
         this.biomeCaches = new BiomeCache[CHUNK_COUNT];
         this.biomeArrays = new BiomeArray[CHUNK_COUNT];
     }
@@ -164,8 +177,15 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
         this.chunkOffsetZ = chunkPos.getZ() - NEIGHBOR_CHUNK_RADIUS;
 
         // Hoist the lighting providers so that they can be directly accessed
-        ChunkLightingView blockLightProvider = this.world.getLightingProvider().get(LightType.BLOCK);
-        ChunkLightingView skyLightProvider = this.world.getLightingProvider().get(LightType.SKY);
+        ChunkLightingView blockLightProvider;
+        ChunkLightingView skyLightProvider;
+        if (enableLights) {
+            blockLightProvider = this.world.getLightingProvider().get(LightType.BLOCK);
+            skyLightProvider = this.world.getLightingProvider().get(LightType.SKY);
+        } else {
+            blockLightProvider = null;
+            skyLightProvider = null;
+        }
 
         // Iterate over all sliced chunks
         for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
@@ -190,11 +210,13 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
                 for (int chunkY = minChunkY; chunkY <= maxChunkY; chunkY++) {
                     int chunkYLocal = chunkY - this.chunkOffsetY;
 
-                    ChunkSectionPos sectionPos = ChunkSectionPos.from(chunkX, chunkY, chunkZ);
-                    int sectionIdx = getLocalSectionIndex(chunkXLocal, chunkYLocal, chunkZLocal);
+                    if (enableLights) {
+                        ChunkSectionPos sectionPos = ChunkSectionPos.from(chunkX, chunkY, chunkZ);
+                        int sectionIdx = getLocalSectionIndex(chunkXLocal, chunkYLocal, chunkZLocal);
 
-                    this.blockLightArrays[sectionIdx] = blockLightProvider.getLightSection(sectionPos);
-                    this.skyLightArrays[sectionIdx] = skyLightProvider.getLightSection(sectionPos);
+                        this.blockLightArrays[sectionIdx] = blockLightProvider.getLightSection(sectionPos);
+                        this.skyLightArrays[sectionIdx] = skyLightProvider.getLightSection(sectionPos);
+                    }
 
                     ChunkSection section = null;
 
@@ -286,13 +308,17 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
 
     @Override
     public int getLightLevel(LightType type, BlockPos pos) {
-        switch (type) {
-            case SKY:
-                return this.getLightLevel(this.skyLightArrays, pos);
-            case BLOCK:
-                return this.getLightLevel(this.blockLightArrays, pos);
-            default:
-                return 0;
+        if (enableLights) {
+            switch (type) {
+                case SKY:
+                    return this.getLightLevel(this.skyLightArrays, pos);
+                case BLOCK:
+                    return this.getLightLevel(this.blockLightArrays, pos);
+                default:
+                    return 0;
+            }
+        } else {
+            return fixedLightLevel;
         }
     }
 
@@ -412,8 +438,10 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
 
         Arrays.fill(this.biomeCaches, null);
         Arrays.fill(this.biomeArrays, null);
-        Arrays.fill(this.blockLightArrays, null);
-        Arrays.fill(this.skyLightArrays, null);
+        if (enableLights) {
+            Arrays.fill(this.blockLightArrays, null);
+            Arrays.fill(this.skyLightArrays, null);
+        }
 
         this.biomeCacheManager = null;
         this.chunks = null;
