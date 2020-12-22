@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.world;
 import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.util.collections.FixedLongHashTable;
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.client.world.ClientWorld;
@@ -38,6 +39,7 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
     private final WorldChunk emptyChunk;
 
     private final StampedLock lock = new StampedLock();
+    private final LightingProvider lightingProvider;
 
     private FixedLongHashTable<WorldChunk> chunks;
     private ChunkStatusListener listener;
@@ -51,6 +53,15 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
         this.emptyChunk = new EmptyChunk(world, new ChunkPos(0, 0));
         this.radius = getChunkMapRadius(loadDistance);
         this.chunks = new FixedLongHashTable<>(getChunkMapSize(this.radius), Hash.FAST_LOAD_FACTOR);
+
+        boolean enableLights = SodiumClientMod.options().quality.enableLights;
+
+        this.lightingProvider = new LightingProvider(this, enableLights, enableLights && world.getDimension().hasSkyLight());
+    }
+
+    @Override
+    public LightingProvider getLightingProvider() {
+        return lightingProvider;
     }
 
     @Override

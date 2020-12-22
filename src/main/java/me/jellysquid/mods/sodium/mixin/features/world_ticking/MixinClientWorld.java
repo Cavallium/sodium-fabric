@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.features.world_ticking;
 
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -82,30 +83,34 @@ public abstract class MixinClientWorld extends World {
     }
 
     private void performBiomeParticleDisplayTick(BlockPos pos, Random random) {
-        BiomeParticleConfig config = this.getBiome(pos)
-                .getParticleConfig()
-                .orElse(null);
+        if (SodiumClientMod.options().quality.enableGlobalParticles) {
+            BiomeParticleConfig config = this.getBiome(pos)
+                    .getParticleConfig()
+                    .orElse(null);
 
-        if (config != null && config.shouldAddParticle(random)) {
-            this.addParticle(config.getParticle(),
-                    pos.getX() + random.nextDouble(),
-                    pos.getY() + random.nextDouble(),
-                    pos.getZ() + random.nextDouble(),
-                    0.0D, 0.0D, 0.0D);
+            if (config != null && config.shouldAddParticle(random)) {
+                this.addParticle(config.getParticle(),
+                        pos.getX() + random.nextDouble(),
+                        pos.getY() + random.nextDouble(),
+                        pos.getZ() + random.nextDouble(),
+                        0.0D, 0.0D, 0.0D);
+            }
         }
     }
 
     private void performFluidDisplayTick(BlockState blockState, FluidState fluidState, BlockPos pos, Random random) {
-        fluidState.randomDisplayTick(this, pos, random);
+        if (SodiumClientMod.options().quality.enableGlobalParticles) {
+            fluidState.randomDisplayTick(this, pos, random);
 
-        ParticleEffect particleEffect = fluidState.getParticle();
+            ParticleEffect particleEffect = fluidState.getParticle();
 
-        if (particleEffect != null && random.nextInt(10) == 0) {
-            boolean solid = blockState.isSideSolidFullSquare(this, pos, Direction.DOWN);
+            if (particleEffect != null && random.nextInt(10) == 0) {
+                boolean solid = blockState.isSideSolidFullSquare(this, pos, Direction.DOWN);
 
-            // FIXME: don't allocate here
-            BlockPos blockPos = pos.down();
-            this.addParticle(blockPos, this.getBlockState(blockPos), particleEffect, solid);
+                // FIXME: don't allocate here
+                BlockPos blockPos = pos.down();
+                this.addParticle(blockPos, this.getBlockState(blockPos), particleEffect, solid);
+            }
         }
     }
 }
