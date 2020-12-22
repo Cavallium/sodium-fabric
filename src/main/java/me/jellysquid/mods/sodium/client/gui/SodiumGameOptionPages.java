@@ -61,6 +61,15 @@ public class SodiumGameOptionPages {
                         }, (opts) -> opts.quality.enableClouds)
                         .setImpact(OptionImpact.LOW)
                         .build())
+                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
+                        .setName("Fog")
+                        .setTooltip("Controls whether or not fog will be visible.")
+                        .setControl(TickBoxControl::new)
+                        .setBinding((opts, value) -> {
+                            opts.quality.enableFog = value;
+                        }, (opts) -> opts.quality.enableFog)
+                        .setImpact(OptionImpact.LOW)
+                        .build())
                 .build());
 
         groups.add(OptionGroup.createBuilder()
