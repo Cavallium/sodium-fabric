@@ -46,6 +46,7 @@ public class SodiumGameOptions {
 
         public boolean enableVignette = true;
         public boolean enableClouds = true;
+        public boolean enableFog = true;
 
         public LightingQuality smoothLighting = LightingQuality.HIGH;
     }

@@ -1,7 +1,10 @@
 package me.jellysquid.mods.sodium.client.render.chunk.shader;
 
 import com.google.common.collect.ImmutableList;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.shader.ShaderConstants;
+import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
+import net.minecraft.client.options.CloudRenderMode;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -32,7 +35,9 @@ public enum ChunkFogMode {
      * Retrieves the current fog mode from the fixed-function pipeline.
      */
     public static ChunkFogMode getActiveMode() {
-        if (!GL11.glGetBoolean(GL11.GL_FOG)) {
+        SodiumGameOptions options = SodiumClientMod.options();
+
+        if (!options.quality.enableFog || !GL11.glGetBoolean(GL11.GL_FOG)) {
             return ChunkFogMode.NONE;
         }
 
