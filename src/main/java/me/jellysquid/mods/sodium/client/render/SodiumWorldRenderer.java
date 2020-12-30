@@ -211,7 +211,8 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
         profiler.swap("visible_chunk_tick");
 
-        this.chunkRenderManager.tickVisibleRenders();
+        if (SodiumClientMod.options().quality.enableClientTicking)
+            this.chunkRenderManager.tickVisibleRenders();
 
         profiler.pop();
 

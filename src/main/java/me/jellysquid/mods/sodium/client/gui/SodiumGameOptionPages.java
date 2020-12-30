@@ -182,23 +182,6 @@ public class SodiumGameOptionPages {
                         .setBinding((opts, value) -> opts.particles = value, (opts) -> opts.particles)
                         .setImpact(OptionImpact.MEDIUM)
                         .build())
-                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setName("Enable lighting")
-                        .setTooltip("Uncheck to disable lighting completely")
-                        .setControl(TickBoxControl::new)
-                        .setBinding((opts, value) -> opts.quality.enableLights = value, opts -> opts.quality.enableLights)
-                        .setImpact(OptionImpact.EXTREME)
-                        .setFlags(OptionFlag.REQUIRES_ASSET_RELOAD)
-                        .build())
-                .add(OptionImpl.createBuilder(int.class, sodiumOpts)
-                        .setName("Fixed lighting level")
-                        .setTooltip("Set light level if lighting is disabled")
-                        .setControl(option -> new SliderControl(option, 0, 100, 1, ControlValueFormatter.percentage()))
-                        .setBinding((opts, value) -> {
-                            opts.quality.setFixedLightLevel(value);
-                        }, opts -> opts.quality.fixedLightLevel)
-                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
-                        .build())
                 .add(OptionImpl.createBuilder(SodiumGameOptions.LightingQuality.class, sodiumOpts)
                         .setName("Smooth Lighting")
                         .setTooltip("Controls the quality of smooth lighting effects.\n" +
@@ -207,14 +190,6 @@ public class SodiumGameOptionPages {
                                 "\nHigh (new!) - Smooth block and entity lighting")
                         .setControl(option -> new CyclingControl<>(option, SodiumGameOptions.LightingQuality.class))
                         .setBinding((opts, value) -> opts.quality.smoothLighting = value, opts -> opts.quality.smoothLighting)
-                        .setImpact(OptionImpact.MEDIUM)
-                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
-                        .build())
-                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setName("Enable global particles")
-                        .setTooltip("Uncheck to disable global particles")
-                        .setControl(TickBoxControl::new)
-                        .setBinding((opts, value) -> opts.quality.enableGlobalParticles = value, opts -> opts.quality.enableGlobalParticles)
                         .setImpact(OptionImpact.MEDIUM)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
@@ -265,7 +240,6 @@ public class SodiumGameOptionPages {
                         .setFlags(OptionFlag.REQUIRES_ASSET_RELOAD)
                         .build())
                 .build());
-
 
         return new OptionPage("Quality", ImmutableList.copyOf(groups));
     }
@@ -377,5 +351,52 @@ public class SodiumGameOptionPages {
                 )
                 .build());
         return new OptionPage("Advanced", ImmutableList.copyOf(groups));
+    }
+
+    public static OptionPage extra() {
+        List<OptionGroup> groups = new ArrayList<>();
+
+        groups.add(OptionGroup.createBuilder()
+                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
+                        .setName("Enable lighting")
+                        .setTooltip("Uncheck to disable lighting completely")
+                        .setControl(TickBoxControl::new)
+                        .setBinding((opts, value) -> opts.quality.enableLights = value, opts -> opts.quality.enableLights)
+                        .setImpact(OptionImpact.EXTREME)
+                        .setFlags(OptionFlag.REQUIRES_ASSET_RELOAD)
+                        .build())
+                .add(OptionImpl.createBuilder(int.class, sodiumOpts)
+                        .setName("Fixed lighting level")
+                        .setTooltip("Set light level if lighting is disabled")
+                        .setControl(option -> new SliderControl(option, 0, 100, 1, ControlValueFormatter.percentage()))
+                        .setBinding((opts, value) -> {
+                            opts.quality.setFixedLightLevel(value);
+                        }, opts -> opts.quality.fixedLightLevel)
+                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
+                        .build())
+                .build());
+
+        groups.add(OptionGroup.createBuilder()
+                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
+                        .setName("Enable client ticking")
+                        .setTooltip("Uncheck to disable client-side chunk entities ticking. It will disable mobs movement, fall effects and more.")
+                        .setControl(TickBoxControl::new)
+                        .setBinding((opts, value) -> opts.quality.enableClientTicking = value, opts -> opts.quality.enableClientTicking)
+                        .setImpact(OptionImpact.HIGH)
+                        .build())
+                .build());
+
+        groups.add(OptionGroup.createBuilder()
+                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
+                        .setName("Enable global particles")
+                        .setTooltip("Uncheck to disable global particles")
+                        .setControl(TickBoxControl::new)
+                        .setBinding((opts, value) -> opts.quality.enableGlobalParticles = value, opts -> opts.quality.enableGlobalParticles)
+                        .setImpact(OptionImpact.MEDIUM)
+                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
+                        .build())
+                .build());
+
+        return new OptionPage("Extra", ImmutableList.copyOf(groups));
     }
 }

@@ -22,11 +22,15 @@ import java.util.stream.Stream;
 public class SodiumGameOptions {
     public final QualitySettings quality = new QualitySettings();
     public final AdvancedSettings advanced = new AdvancedSettings();
+    public final ExtraSettings extra = new ExtraSettings();
 
     private File file;
 
     public void notifyListeners() {
         SodiumClientMod.onConfigChanged(this);
+    }
+
+    public static class ExtraSettings {
     }
 
     public static class AdvancedSettings {
@@ -46,6 +50,7 @@ public class SodiumGameOptions {
         public GraphicsQuality weatherQuality = GraphicsQuality.DEFAULT;
 
         public boolean enableLights = true;
+        public boolean enableClientTicking = true;
         public boolean enableGlobalParticles = true;
         public boolean enableVignette = true;
         public boolean enableClouds = true;
