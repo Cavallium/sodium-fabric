@@ -56,25 +56,7 @@ public class SodiumGameOptions {
         public boolean enableClouds = true;
         public boolean enableFog = true;
 
-        /**
-         * 0 to 100
-         */
-        public int fixedLightLevel = 100;
-        /**
-         * 0 to 15
-         */
-        public transient int fixedLightLevelMcValue = 15;
-
         public LightingQuality smoothLighting = LightingQuality.HIGH;
-
-        /**
-         * @return light level from 0 to 100
-         */
-        public void setFixedLightLevel(int value) {
-            OptionFixedLightPipeline.setValue(value);
-            this.fixedLightLevelMcValue = (int) (value * 15.0f / 100.0f);
-            this.fixedLightLevel = value;
-        }
     }
 
     public enum ChunkRendererBackendOption implements TextProvider {

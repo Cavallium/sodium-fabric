@@ -46,8 +46,6 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
     private ClientWorld world;
     private int renderDistance;
-    private boolean enableLights;
-    private int fixedLightLevel;
 
     private double lastCameraX, lastCameraY, lastCameraZ;
     private double lastCameraPitch, lastCameraYaw;
@@ -248,10 +246,10 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         this.chunkRenderBackend = createChunkRenderBackend(opts.advanced.chunkRendererBackend, vertexFormat);
         this.chunkRenderBackend.createShaders();
 
-        this.enableLights = SodiumClientMod.options().quality.enableLights;
-        this.fixedLightLevel = SodiumClientMod.options().quality.fixedLightLevelMcValue;
+        boolean enableLights = SodiumClientMod.options().quality.enableLights;
+        int fixedLightLevel = 15;
 
-        this.chunkRenderManager = new ChunkRenderManager<>(this, this.chunkRenderBackend, this.renderPassManager, this.world, this.renderDistance, this.enableLights, this.fixedLightLevel);
+        this.chunkRenderManager = new ChunkRenderManager<>(this, this.chunkRenderBackend, this.renderPassManager, this.world, this.renderDistance, enableLights, fixedLightLevel);
         this.chunkRenderManager.restoreChunks(this.loadedChunkPositions);
     }
 
