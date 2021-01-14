@@ -37,7 +37,7 @@ public class OptionFixedLightPipeline implements LightPipeline {
     @Override
     public void calculate(ModelQuadView quad, BlockPos pos, QuadLightData out, Direction face, boolean shade) {
         Arrays.fill(out.lm, LightmapTextureManager.pack(0, 15));
-        float faceGammaWeight = 0.2f;
+        float faceGammaWeight = 0.4f;
         float heightGammaWeight = 0.7f;
         float gameGammaWeight = 0.7f;
 
