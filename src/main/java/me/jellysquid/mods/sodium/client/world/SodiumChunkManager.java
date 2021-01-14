@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.world;
 
 import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.util.collections.FixedLongHashTable;
@@ -43,7 +44,7 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
     private final StampedLock lock = new StampedLock();
     private final LightingProvider lightingProvider;
 
-    private FixedLongHashTable<WorldChunk> chunks;
+    private Long2ObjectOpenHashMap<WorldChunk> chunks;
     private ChunkStatusListener listener;
     private int centerX, centerZ;
     private int radius;
@@ -54,7 +55,7 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
         this.world = world;
         this.emptyChunk = new EmptyChunk(world, new ChunkPos(0, 0));
         this.radius = getChunkMapRadius(loadDistance);
-        this.chunks = new FixedLongHashTable<>(getChunkMapSize(this.radius), Hash.FAST_LOAD_FACTOR);
+        this.chunks = new Long2ObjectOpenHashMap<>(getChunkMapSize(this.radius), Hash.FAST_LOAD_FACTOR);
 
         this.lightingProvider = new DynamicLightingProvider(this, true, world.getDimension().hasSkyLight());
     }
@@ -150,12 +151,12 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
     public void updateLoadDistance(int loadDistance) {
         this.radius = getChunkMapRadius(loadDistance);
 
-        FixedLongHashTable<WorldChunk> copy = new FixedLongHashTable<>(getChunkMapSize(this.radius), Hash.FAST_LOAD_FACTOR);
+        Long2ObjectOpenHashMap<WorldChunk> copy = new Long2ObjectOpenHashMap<>(getChunkMapSize(this.radius), Hash.FAST_LOAD_FACTOR);
 
         long stamp = this.lock.writeLock();
 
         try {
-            ObjectIterator<Long2ObjectMap.Entry<WorldChunk>> it = this.chunks.iterator();
+            ObjectIterator<Long2ObjectMap.Entry<WorldChunk>> it = this.chunks.long2ObjectEntrySet().fastIterator();
 
             while (it.hasNext()) {
                 Long2ObjectMap.Entry<WorldChunk> entry = it.next();
