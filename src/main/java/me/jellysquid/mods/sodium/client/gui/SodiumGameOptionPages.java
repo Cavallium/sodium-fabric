@@ -44,7 +44,11 @@ public class SodiumGameOptionPages {
                         .setName("Brightness")
                         .setTooltip("Controls the brightness (gamma) of the game.")
                         .setControl(opt -> new SliderControl(opt, 0, 100, 1, ControlValueFormatter.brightness()))
-                        .setBinding((opts, value) -> opts.gamma = value * 0.01D, (opts) -> (int) (opts.gamma / 0.01D))
+                        .setBinding((opts, value) -> {
+                            double newGammaValue = value * 0.01D;
+                            opts.gamma = newGammaValue;
+                            OptionFixedLightPipeline.setValue(OptionFixedLightPipeline.getValueFromGamma(newGammaValue));
+                        }, (opts) -> (int) (opts.gamma / 0.01D))
                         .build())
                 .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
                         .setName("Clouds")
@@ -364,15 +368,6 @@ public class SodiumGameOptionPages {
                         .setBinding((opts, value) -> opts.quality.enableLights = value, opts -> opts.quality.enableLights)
                         .setImpact(OptionImpact.EXTREME)
                         .setFlags(OptionFlag.REQUIRES_ASSET_RELOAD)
-                        .build())
-                .add(OptionImpl.createBuilder(int.class, sodiumOpts)
-                        .setName("Fixed lighting level")
-                        .setTooltip("Set light level if lighting is disabled")
-                        .setControl(option -> new SliderControl(option, 0, 100, 1, ControlValueFormatter.percentage()))
-                        .setBinding((opts, value) -> {
-                            opts.quality.setFixedLightLevel(value);
-                        }, opts -> opts.quality.fixedLightLevel)
-                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
                 .build());
 

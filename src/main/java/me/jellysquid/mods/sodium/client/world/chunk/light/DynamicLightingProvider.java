@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.world.chunk.light;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.world.SodiumChunkManager;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
@@ -23,15 +24,11 @@ public class DynamicLightingProvider extends LightingProvider {
         super(chunkProvider, hasBlockLight, hasSkyLight);
         this.lightingProvider = new LightingProvider(chunkProvider, true, hasSkyLight);
 
-        this.fixedLightingProvider = new FixedLightingProvider(chunkProvider, true, hasSkyLight, this::getFixedLightLevel);
+        this.fixedLightingProvider = new FixedLightingProvider(chunkProvider, true, hasSkyLight);
     }
 
     private boolean isLightEnabled() {
         return SodiumClientMod.options().quality.enableLights;
-    }
-
-    private int getFixedLightLevel() {
-        return SodiumClientMod.options().quality.fixedLightLevelMcValue;
     }
 
     private LightingProvider getLightingProvider() {

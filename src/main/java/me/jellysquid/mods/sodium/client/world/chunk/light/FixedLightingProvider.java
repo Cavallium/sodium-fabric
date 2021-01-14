@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.world.chunk.light;
 import java.util.function.IntSupplier;
 
 import me.jellysquid.mods.sodium.client.world.SodiumChunkManager;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
@@ -16,23 +17,23 @@ import org.jetbrains.annotations.Nullable;
 
 public class FixedLightingProvider extends LightingProvider {
 
-    private final IntSupplier lightLevelSupplier;
     private final FixedChunkLightingView fixedChunkLightingView;
 
-    public FixedLightingProvider(SodiumChunkManager sodiumChunkManager, boolean hasBlockLight, boolean hasSkyLight, IntSupplier lightLevelSupplier) {
+    public FixedLightingProvider(SodiumChunkManager sodiumChunkManager, boolean hasBlockLight, boolean hasSkyLight) {
         super(sodiumChunkManager, hasBlockLight, hasSkyLight);
-        this.lightLevelSupplier = lightLevelSupplier;
-        this.fixedChunkLightingView = new FixedChunkLightingView(sodiumChunkManager, lightLevelSupplier);
+        this.fixedChunkLightingView = new FixedChunkLightingView(sodiumChunkManager);
     }
 
-    private static class FixedChunkLightingView implements net.minecraft.world.chunk.light.ChunkLightingView {
+    private int getFixedLightLevel() {
+        return (int) (MinecraftClient.getInstance().options.gamma * 15.0d);
+    }
+
+    private class FixedChunkLightingView implements net.minecraft.world.chunk.light.ChunkLightingView {
 
         private final SodiumChunkManager sodiumChunkManager;
-        private final IntSupplier lightLevelSupplier;
 
-        public FixedChunkLightingView(SodiumChunkManager sodiumChunkManager, IntSupplier lightLevelSupplier) {
+        public FixedChunkLightingView(SodiumChunkManager sodiumChunkManager) {
             this.sodiumChunkManager = sodiumChunkManager;
-            this.lightLevelSupplier = lightLevelSupplier;
         }
 
         @Nullable
@@ -44,7 +45,7 @@ public class FixedLightingProvider extends LightingProvider {
         @Override
         public int getLightLevel(BlockPos blockPos) {
             WorldView w = (WorldView) sodiumChunkManager.getWorld();
-            return lightLevelSupplier.getAsInt() - w.getAmbientDarkness();
+            return getFixedLightLevel() - w.getAmbientDarkness();
         }
 
         @Override
@@ -68,7 +69,7 @@ public class FixedLightingProvider extends LightingProvider {
 
     @Override
     public int getLight(BlockPos pos, int ambientDarkness) {
-        return lightLevelSupplier.getAsInt() - ambientDarkness;
+        return getFixedLightLevel() - ambientDarkness;
     }
 
     @Override
@@ -88,7 +89,7 @@ public class FixedLightingProvider extends LightingProvider {
 
     @Override
     public String displaySectionLevel(LightType lightType, ChunkSectionPos chunkSectionPos) {
-        return "" + lightLevelSupplier.getAsInt();
+        return "" + getFixedLightLevel();
     }
 
     @Override
