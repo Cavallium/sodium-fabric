@@ -57,9 +57,9 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     private final Set<BlockEntity> globalBlockEntities = new ObjectOpenHashSet<>();
 
     private Frustum frustum;
-    private ChunkRenderManager<?> chunkRenderManager;
+    private ChunkRenderManager chunkRenderManager;
     private BlockRenderPassManager renderPassManager;
-    private ChunkRenderBackend<?> chunkRenderBackend;
+    private ChunkRenderBackend chunkRenderBackend;
 
     /**
      * Instantiates Sodium's world renderer. This should be called at the time of the world renderer initialization.
@@ -272,12 +272,12 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         boolean enableLights = SodiumClientMod.options().quality.enableLights;
         int fixedLightLevel = 15;
 
-        this.chunkRenderManager = new ChunkRenderManager<>(this, this.chunkRenderBackend, this.renderPassManager, this.world, this.renderDistance, enableLights, fixedLightLevel);
+        this.chunkRenderManager = new ChunkRenderManager(this, this.chunkRenderBackend, this.renderPassManager, this.world, this.renderDistance, enableLights, fixedLightLevel);
         this.chunkRenderManager.restoreChunks(this.loadedChunkPositions);
     }
 
-    private static ChunkRenderBackend<?> createChunkRenderBackend(SodiumGameOptions.ChunkRendererBackendOption opt,
-                                                                  ChunkVertexType vertexFormat) {
+    private static ChunkRenderBackend createChunkRenderBackend(SodiumGameOptions.ChunkRendererBackendOption opt,
+                                                               ChunkVertexType vertexFormat) {
         boolean disableBlacklist = SodiumClientMod.options().advanced.disableDriverBlacklist;
 
         switch (opt) {
@@ -439,7 +439,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         this.chunkRenderManager.scheduleRebuild(x, y, z, important);
     }
 
-    public ChunkRenderBackend<?> getChunkRenderer() {
+    public ChunkRenderBackend getChunkRenderer() {
         return this.chunkRenderBackend;
     }
 }
