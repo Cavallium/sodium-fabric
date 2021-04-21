@@ -1,5 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile;
 
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkGraphicsState;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderBackend;
@@ -14,6 +16,7 @@ import me.jellysquid.mods.sodium.client.world.ClientWorldExtended;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeCacheManager;
 import me.jellysquid.mods.sodium.common.util.collections.DequeDrain;
+import me.jellysquid.mods.sodium.common.util.collections.LimitedDequeDrain;
 import me.jellysquid.mods.sodium.common.util.pool.ObjectPool;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.Vector3d;
@@ -158,7 +161,11 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
             return false;
         }
 
-        this.backend.upload(new DequeDrain<>(this.uploadQueue));
+        if (SodiumClientMod.options().quality.lazyChunkUpdates > 0) {
+            this.backend.upload(new LimitedDequeDrain<>(this.uploadQueue, SodiumGameOptions.QualitySettings.LAZIEST_CHUNK_UPDATES + 1 - SodiumClientMod.options().quality.lazyChunkUpdates));
+        } else {
+            this.backend.upload(new DequeDrain<>(this.uploadQueue));
+        }
 
         return true;
     }
@@ -226,6 +233,9 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
      * but can be up to the number of available processor threads on the system.
      */
     private static int getOptimalThreadCount() {
+        if (SodiumClientMod.options().quality.lazyChunkUpdates > 1) {
+            return 1;
+        }
         return Math.max(1, Runtime.getRuntime().availableProcessors());
     }
 

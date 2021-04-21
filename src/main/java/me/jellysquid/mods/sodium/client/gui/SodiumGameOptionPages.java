@@ -382,6 +382,29 @@ public class SodiumGameOptionPages {
                 .build());
 
         groups.add(OptionGroup.createBuilder()
+                .add(OptionImpl.createBuilder(int.class, sodiumOpts)
+                        .setName("Lazy chunk updates")
+                        .setTooltip("Reduce chunk updates caused by the movement of the player.")
+                        .setControl(option -> new SliderControl(option, 0, SodiumGameOptions.QualitySettings.LAZIEST_CHUNK_UPDATES, 1, ControlValueFormatter.quantityOrDisabled("x slower", "Standard")))
+                        .setBinding((opts, value) -> opts.quality.lazyChunkUpdates = value, opts -> opts.quality.lazyChunkUpdates)
+                        .setImpact(OptionImpact.MEDIUM)
+                        .build())
+                .build());
+
+        groups.add(OptionGroup.createBuilder()
+                .add(OptionImpl.createBuilder(int.class, sodiumOpts)
+                        .setName("Nearby chunk distance")
+                        .setTooltip("Under this distance the chunks can block updates when updating")
+                        .setControl(option -> new SliderControl(option, 0, Math.floorDiv(SodiumGameOptions.QualitySettings.MAX_NEARBY_CHUNK_DISTANCE, 16), 1, ControlValueFormatter.quantity("chunks")))
+                        .setBinding((opts, value) -> {
+                            opts.quality.nearbyChunkDistance = value * 16;
+                            opts.quality.nearbyChunkDistancePow2 = Math.pow(value * 16, 2);
+                        }, opts -> Math.floorDiv(opts.quality.nearbyChunkDistance, 16))
+                        .setImpact(OptionImpact.MEDIUM)
+                        .build())
+                .build());
+
+        groups.add(OptionGroup.createBuilder()
                 .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
                         .setName("Enable global particles")
                         .setTooltip("Uncheck to disable global particles")

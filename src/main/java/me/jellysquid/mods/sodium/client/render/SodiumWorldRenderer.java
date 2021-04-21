@@ -181,23 +181,32 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
         Vec3d cameraPos = camera.getPos();
 
-        this.chunkRenderManager.setCameraPosition(cameraPos.x, cameraPos.y, cameraPos.z);
-
         float pitch = camera.getPitch();
         float yaw = camera.getYaw();
 
-        boolean dirty = cameraPos.x != this.lastCameraX || cameraPos.y != this.lastCameraY || cameraPos.z != this.lastCameraZ ||
-                pitch != this.lastCameraPitch || yaw != this.lastCameraYaw;
+        int lazyChunkUpdatesValue = SodiumClientMod.options().quality.lazyChunkUpdates;
+        boolean dirty = false;
 
-        if (dirty) {
-            this.chunkRenderManager.markDirty();
+        if (lazyChunkUpdatesValue > 0) {
+            dirty = checkLazyChunkUpdatesDirtiness(cameraPos, yaw, pitch, lazyChunkUpdatesValue);
+        } else {
+            dirty = (cameraPos.x != this.lastCameraX) || (cameraPos.y != this.lastCameraY) || (cameraPos.z != this.lastCameraZ) ||
+                    (pitch != this.lastCameraPitch) || (yaw != this.lastCameraYaw);
+
+            if (dirty) {
+                this.chunkRenderManager.markDirty();
+
+                this.lastCameraX = cameraPos.x;
+                this.lastCameraY = cameraPos.y;
+                this.lastCameraZ = cameraPos.z;
+                this.lastCameraPitch = pitch;
+                this.lastCameraYaw = yaw;
+            }
         }
 
-        this.lastCameraX = cameraPos.x;
-        this.lastCameraY = cameraPos.y;
-        this.lastCameraZ = cameraPos.z;
-        this.lastCameraPitch = pitch;
-        this.lastCameraYaw = yaw;
+        if (lazyChunkUpdatesValue == 0 || dirty) {
+            this.chunkRenderManager.setCameraPosition(cameraPos.x, cameraPos.y, cameraPos.z);
+        }
 
         profiler.swap("chunk_update");
 
@@ -217,6 +226,34 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         profiler.pop();
 
         Entity.setRenderDistanceMultiplier(MathHelper.clamp((double) this.client.options.viewDistance / 8.0D, 1.0D, 2.5D) * (double) this.client.options.entityDistanceScaling);
+    }
+
+    private boolean checkLazyChunkUpdatesDirtiness(Vec3d cameraPos, float yaw, float pitch, int lazyChunkUpdatesValue) {
+        double dirtyPos = Math.abs(cameraPos.x - this.lastCameraX) + Math.abs(cameraPos.y - this.lastCameraY) + Math.abs(cameraPos.z - this.lastCameraZ);
+        double dirtyRot = Math.abs(pitch - this.lastCameraPitch) + Math.abs(yaw - this.lastCameraYaw);
+        boolean alreadyMarkedDirty;
+
+        if (dirtyPos > lazyChunkUpdatesValue * 8d) {
+            this.chunkRenderManager.markDirty();
+            alreadyMarkedDirty = true;
+
+            this.lastCameraX = cameraPos.x;
+            this.lastCameraY = cameraPos.y;
+            this.lastCameraZ = cameraPos.z;
+        } else {
+            alreadyMarkedDirty = false;
+        }
+        if (dirtyRot > 180d / (SodiumGameOptions.QualitySettings.LAZIEST_CHUNK_UPDATES - (lazyChunkUpdatesValue - 1))) {
+            if (!alreadyMarkedDirty) {
+                this.chunkRenderManager.markDirty();
+                alreadyMarkedDirty = true;
+            }
+
+            this.lastCameraPitch = pitch;
+            this.lastCameraYaw = yaw;
+        }
+
+        return alreadyMarkedDirty;
     }
 
     /**

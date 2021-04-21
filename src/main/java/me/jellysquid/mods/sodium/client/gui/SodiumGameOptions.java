@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import me.jellysquid.mods.sodium.client.model.light.fixed.OptionFixedLightPipeline;
+import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderManager;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl20.GL20ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl30.GL30ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl43.GL43ChunkRenderBackend;
@@ -50,6 +51,11 @@ public class SodiumGameOptions {
         public GraphicsQuality weatherQuality = GraphicsQuality.DEFAULT;
 
         public boolean enableLights = true;
+        public static int LAZIEST_CHUNK_UPDATES = 4;
+        public int lazyChunkUpdates = 0;
+        public static int MAX_NEARBY_CHUNK_DISTANCE = (int) Math.sqrt(ChunkRenderManager.NEARBY_CHUNK_DISTANCE);
+        public int nearbyChunkDistance = MAX_NEARBY_CHUNK_DISTANCE;
+        public transient double nearbyChunkDistancePow2 = Math.pow(MAX_NEARBY_CHUNK_DISTANCE, 2);
         public boolean enableClientTicking = true;
         public boolean enableGlobalParticles = true;
         public boolean enableVignette = true;

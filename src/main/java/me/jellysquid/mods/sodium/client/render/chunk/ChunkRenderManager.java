@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.util.GlFogHelper;
+import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildResult;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuilder;
@@ -45,7 +46,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     /**
      * The maximum distance a chunk can be from the player's camera in order to be eligible for blocking updates.
      */
-    private static final double NEARBY_CHUNK_DISTANCE = Math.pow(48, 2.0);
+    public static final double NEARBY_CHUNK_DISTANCE = Math.pow(48, 2.0);
 
     /**
      * The minimum distance the culling plane can be from the player's camera. This helps to prevent mathematical
@@ -413,7 +414,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     public void updateChunks() {
         Deque<CompletableFuture<ChunkBuildResult<T>>> futures = new ArrayDeque<>();
 
-        int budget = this.builder.getSchedulingBudget();
+        int budget = SodiumClientMod.options().quality.lazyChunkUpdates > 0 ? SodiumGameOptions.QualitySettings.LAZIEST_CHUNK_UPDATES + 1 - SodiumClientMod.options().quality.lazyChunkUpdates : this.builder.getSchedulingBudget();
         int submitted = 0;
 
         while (!this.importantRebuildQueue.isEmpty()) {
@@ -428,6 +429,10 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
 
             this.dirty = true;
             submitted++;
+
+            if (SodiumClientMod.options().quality.lazyChunkUpdates > 0 && submitted > budget) {
+                break;
+            }
         }
 
         while (submitted < budget && !this.rebuildQueue.isEmpty()) {
@@ -508,12 +513,16 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
                         .enqueue(render);
             }
 
-            this.dirty = true;
+            if (SodiumClientMod.options().quality.lazyChunkUpdates == 0 || important) {
+                this.dirty = true;
+            }
         }
     }
 
     public boolean isChunkPrioritized(ChunkRenderContainer<T> render) {
-        return render.getSquaredDistance(this.cameraX, this.cameraY, this.cameraZ) <= NEARBY_CHUNK_DISTANCE;
+        double squaredDistance = render.getSquaredDistance(this.cameraX, this.cameraY, this.cameraZ);
+        double nearbyChunkDistanceValue = (SodiumClientMod.options().quality.nearbyChunkDistancePow2);
+        return squaredDistance <= nearbyChunkDistanceValue;
     }
 
     public int getVisibleChunkCount() {
