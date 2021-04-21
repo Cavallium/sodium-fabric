@@ -58,11 +58,11 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
     private final ChunkVertexType vertexType;
     private final ChunkRenderBackend<T> backend;
 
-    public ChunkBuilder(ChunkVertexType vertexType, ChunkRenderBackend<T> backend) {
+    public ChunkBuilder(ChunkVertexType vertexType, ChunkRenderBackend<T> backend, boolean enableLights, int fixedLightLevel) {
         this.vertexType = vertexType;
         this.backend = backend;
         this.limitThreads = getOptimalThreadCount();
-        this.pool = new ObjectPool<>(this.getSchedulingBudget(), WorldSlice::new);
+        this.pool = new ObjectPool<>(this.getSchedulingBudget(), () -> new WorldSlice(enableLights, fixedLightLevel));
     }
 
     /**

@@ -79,6 +79,9 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     private final SodiumWorldRenderer renderer;
     private final ClientWorld world;
 
+    private final boolean enableLights;
+    private final int fixedLightLevel;
+
     private final ChunkCuller culler;
     private final boolean useChunkFaceCulling;
 
@@ -90,12 +93,15 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     private boolean useFogCulling;
     private double fogRenderCutoff;
 
-    public ChunkRenderManager(SodiumWorldRenderer renderer, ChunkRenderBackend<T> backend, BlockRenderPassManager renderPassManager, ClientWorld world, int renderDistance) {
+    public ChunkRenderManager(SodiumWorldRenderer renderer, ChunkRenderBackend<T> backend, BlockRenderPassManager renderPassManager, ClientWorld world, int renderDistance,  boolean enableLights, int fixedLightLevel) {
         this.backend = backend;
         this.renderer = renderer;
         this.world = world;
 
-        this.builder = new ChunkBuilder<>(backend.getVertexType(), this.backend);
+        this.enableLights = enableLights;
+        this.fixedLightLevel = fixedLightLevel;
+
+        this.builder = new ChunkBuilder<>(backend.getVertexType(), this.backend, this.enableLights, this.fixedLightLevel);
         this.builder.init(world, renderPassManager);
 
         this.dirty = true;

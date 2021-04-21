@@ -2,8 +2,8 @@ package me.jellysquid.mods.sodium.client.world.chunk.light;
 
 import java.util.function.IntSupplier;
 
-import me.jellysquid.mods.sodium.client.world.SodiumChunkManager;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
@@ -19,7 +19,7 @@ public class FixedLightingProvider extends LightingProvider {
 
     private final FixedChunkLightingView fixedChunkLightingView;
 
-    public FixedLightingProvider(SodiumChunkManager sodiumChunkManager, boolean hasBlockLight, boolean hasSkyLight) {
+    public FixedLightingProvider(ClientChunkManager sodiumChunkManager, boolean hasBlockLight, boolean hasSkyLight) {
         super(sodiumChunkManager, hasBlockLight, hasSkyLight);
         this.fixedChunkLightingView = new FixedChunkLightingView(sodiumChunkManager);
     }
@@ -30,9 +30,9 @@ public class FixedLightingProvider extends LightingProvider {
 
     private class FixedChunkLightingView implements net.minecraft.world.chunk.light.ChunkLightingView {
 
-        private final SodiumChunkManager sodiumChunkManager;
+        private final ClientChunkManager sodiumChunkManager;
 
-        public FixedChunkLightingView(SodiumChunkManager sodiumChunkManager) {
+        public FixedChunkLightingView(ClientChunkManager sodiumChunkManager) {
             this.sodiumChunkManager = sodiumChunkManager;
         }
 

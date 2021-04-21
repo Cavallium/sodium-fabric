@@ -1,13 +1,24 @@
 package me.jellysquid.mods.sodium.mixin.features.chunk_rendering;
 
+import java.util.function.Supplier;
+
 import me.jellysquid.mods.sodium.client.world.ChunkStatusListener;
 import me.jellysquid.mods.sodium.client.world.ChunkStatusListenerManager;
+import me.jellysquid.mods.sodium.client.world.chunk.light.DynamicLightingProvider;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.world.ClientChunkManager;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.profiler.Profiler;
+import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.world.World;
 import net.minecraft.world.biome.source.BiomeArray;
 import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.chunk.light.LightingProvider;
+import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,8 +28,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 @Mixin(ClientChunkManager.class)
-public class MixinClientChunkManager implements ChunkStatusListenerManager {
+public abstract class MixinClientChunkManager implements ChunkStatusListenerManager {
     private ChunkStatusListener listener;
+    @Shadow
+    @Final
+    private LightingProvider lightingProvider;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void init(ClientWorld world, int loadDistance, CallbackInfo ci) {
+        //noinspection ConstantConditions
+        this.lightingProvider = new DynamicLightingProvider((ClientChunkManager) (Object) this, true, world.getDimension().hasSkyLight());
+    }
 
     @Inject(method = "loadChunkFromPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;resetChunkColor(II)V", shift = At.Shift.AFTER))
     private void afterLoadChunkFromPacket(int x, int z, BiomeArray biomes, PacketByteBuf buf, CompoundTag tag, int verticalStripBitmask, boolean complete, CallbackInfoReturnable<WorldChunk> cir) {

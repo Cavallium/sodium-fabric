@@ -211,7 +211,8 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
         profiler.swap("visible_chunk_tick");
 
-        this.chunkRenderManager.tickVisibleRenders();
+        if (SodiumClientMod.options().quality.enableClientTicking)
+            this.chunkRenderManager.tickVisibleRenders();
 
         profiler.pop();
 
@@ -268,7 +269,10 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         this.chunkRenderBackend = createChunkRenderBackend(opts.advanced.chunkRendererBackend, vertexFormat);
         this.chunkRenderBackend.createShaders();
 
-        this.chunkRenderManager = new ChunkRenderManager<>(this, this.chunkRenderBackend, this.renderPassManager, this.world, this.renderDistance);
+        boolean enableLights = SodiumClientMod.options().quality.enableLights;
+        int fixedLightLevel = 15;
+
+        this.chunkRenderManager = new ChunkRenderManager<>(this, this.chunkRenderBackend, this.renderPassManager, this.world, this.renderDistance, enableLights, fixedLightLevel);
         this.chunkRenderManager.restoreChunks(this.loadedChunkPositions);
     }
 
